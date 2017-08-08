@@ -14,22 +14,42 @@ def recvall( sock, length ):
         data += more
     return data
 
+def recvall_two( sock ):
+    data = b''
+    while '\r' not in data.decode('ascii') :
+        more = sock.recv(8192)
+        if not more:
+            raise EOFError('was expecting bytes but only received'
+                           ' bytes before the socket closed'
+                           )
+        data += more
+    return data
+
+
 def server(interface, port):
+    #arq = open('dados.txt', mode='w')
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     sock.bind((interface, port))
     sock.listen(1)
     print('Listening at ',sock.getsockname())
-    while True:
+    #lista = []
+    #while True:
+    for _ in range(0, 50):
         sc, sockname = sock.accept()
         print('We have accepted a connection from:', sockname )
         print('Socket name:', sc.getsockname())
         print('Socket peer:', sc.getpeername())
-        message = recvall(sc, 16)
+        #message = recvall(sc, 16)
+        message = recvall_two(sc)
         print(' Incoming sixteen-octet message:', repr(message))
-        sc.sendall(b'Farewell, client')
-        sc.close()
-        print(' Reply sent, socket closed')
+        #lista.append(repr(message))
+        #sc.sendall(b'Farewell, client')
+
+        #print(' Reply sent, socket closed')
+    #arq.writelines(lista)
+    #arq.close()
+    sc.close()
 
 def client(host, port):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
